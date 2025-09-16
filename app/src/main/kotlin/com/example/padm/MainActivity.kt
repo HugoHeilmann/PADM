@@ -1,4 +1,4 @@
-package com.example.piratesAuxDoigtsMouilles
+package com.example.padm
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,11 +11,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            PiratesAuxDoigtsMouillesApp()
+            PADM()
         }
     }
 }
 
 @Composable
-fun PiratesAuxDoigtsMouillesApp() {
+fun PADM() {
 }

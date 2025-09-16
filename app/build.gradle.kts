@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.piratesAuxDoigtsMouilles"
+    namespace = "com.example.padm"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.piratesAuxDoigtsMouilles"
+        applicationId = "com.example.padm"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
