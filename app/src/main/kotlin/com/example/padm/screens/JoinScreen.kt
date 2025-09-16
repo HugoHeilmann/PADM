@@ -1,26 +1,30 @@
 package com.example.padm.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.padm.net.joinGame
+import com.example.padm.ui.components.RopeDivider
+import com.example.padm.ui.theme.PirateColors
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,89 +39,109 @@ fun JoinScreen(
     var isError by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
-
     val isValid = gameId.trim().isNotEmpty() && playerId.trim().isNotEmpty()
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .background(Brush.verticalGradient(listOf(PirateColors.SeaNight, PirateColors.SeaDeep)))
+            .padding(20.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .align(Alignment.Center)
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .shadow(12.dp, RoundedCornerShape(28.dp), clip = false)
+                .clip(RoundedCornerShape(28.dp))
+                .background(Brush.verticalGradient(listOf(PirateColors.ParchmentLight, PirateColors.ParchmentDark)))
+                .border(2.dp, PirateColors.Leather, RoundedCornerShape(28.dp))
+                .padding(22.dp)
         ) {
-            Text(
-                text = "Rejoindre une partie",
-                fontSize = 22.sp
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "🏴‍☠️  Embarquez, moussaillon !",
+                    fontSize = 20.sp,
+                    color = Color(0xFF2C1608),
+                    fontFamily = FontFamily.Serif
+                )
 
-            OutlinedTextField(
-                value = gameId,
-                onValueChange = { input ->
-                    gameId = input.uppercase().trimStart()
-                },
-                label = { Text("Game ID") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Characters,
-                    imeAction = ImeAction.Next
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
+                RopeDivider()
 
-            OutlinedTextField(
-                value = playerId,
-                onValueChange = { playerId = it.trimStart() },
-                label = { Text("Player ID (pseudo)") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words,
-                    imeAction = ImeAction.Done
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
+                OutlinedTextField(
+                    value = gameId,
+                    onValueChange = { gameId = it.uppercase().trimStart() },
+                    label = { Text("ID de la partie (Game ID)") },
+                    leadingIcon = { Text("🗺️") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Characters,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Button(
-                onClick = {
-                    status = null
-                    isError = false
-                    loading = true
-                    scope.launch {
-                        val result = joinGame(gameId.trim(), playerId.trim())
-                        loading = false
+                OutlinedTextField(
+                    value = playerId,
+                    onValueChange = { playerId = it.trimStart() },
+                    label = { Text("Nom de pirate (Player ID)") },
+                    leadingIcon = { Text("🦜") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Words,
+                        imeAction = ImeAction.Done
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                        if (result.ok) {
-                            status = "✅ ${result.message} (playerNumber=${result.playerNumber ?: "?"})"
-                            isError = false
-                            onJoined(gameId.trim(), playerId.trim(), result.playerNumber)
-                        } else {
-                            status = "❌ ${result.message}"
-                            isError = true
+                val buttonShape = RoundedCornerShape(16.dp)
+                val pirateGradient = Brush.horizontalGradient(listOf(PirateColors.Leather, PirateColors.Copper))
+
+                Button(
+                    onClick = {
+                        status = null
+                        isError = false
+                        loading = true
+                        scope.launch {
+                            val result = joinGame(gameId.trim(), playerId.trim())
+                            loading = false
+                            if (result.ok) {
+                                status = "✅ ${result.message} (numéro=${result.playerNumber ?: "?"})"
+                                onJoined(gameId.trim(), playerId.trim(), result.playerNumber)
+                            } else {
+                                status = "❌ ${result.message}"
+                                isError = true
+                            }
                         }
-                    }
-                },
-                enabled = isValid && !loading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(if (loading) "Connexion..." else "Rejoindre")
-            }
+                    },
+                    enabled = isValid && !loading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        contentColor = Color.White,
+                        disabledContentColor = Color.White.copy(alpha = 0.6f)
+                    ),
+                    contentPadding = PaddingValues(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                        .clip(buttonShape)
+                        .background(pirateGradient, shape = buttonShape)
+                        .border(1.dp, Color(0xFF4D2F14), buttonShape)
+                ) {
+                    Text(if (loading) "En cours..." else "Embarquer ⚓", fontSize = 18.sp)
+                }
 
-            if (status != null) {
-                val color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                Text(text = status!!, color = color)
+                status?.let {
+                    val color = if (isError) MaterialTheme.colorScheme.error else Color(0xFF1B5E20)
+                    Text(text = it, color = color, fontFamily = FontFamily.Serif)
+                }
             }
         }
 
         if (loading) {
             CircularProgressIndicator(
-                modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.BottomEnd)
-                    .padding(8.dp)
+                modifier = Modifier.size(48.dp).align(Alignment.BottomEnd).padding(8.dp),
+                color = PirateColors.Copper
             )
         }
     }

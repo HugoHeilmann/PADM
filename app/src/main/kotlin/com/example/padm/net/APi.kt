@@ -40,8 +40,13 @@ suspend fun joinGame(gameId: String, playerId: String): JoinGameResult = withCon
             val raw = response.body?.string().orEmpty()
 
             if (!response.isSuccessful) {
-                val msg = runCatching { JSONObject(raw).optString("error", raw) }.getOrElse { raw }
-                return@withContext JoinGameResult(false, null, "HTTP ${response.code} : $msg")
+                val parsed = runCatching { JSONObject(raw) }.getOrNull()
+                val msg = parsed?.optString("message")
+                    ?.takeIf { it.isNotBlank() }
+                    ?: parsed?.optString("error")
+                    ?: "Erreur serveur (${response.code})"
+
+                return@withContext JoinGameResult(false, null, msg)
             }
 
             val json = runCatching { JSONObject(raw) }.getOrNull()
