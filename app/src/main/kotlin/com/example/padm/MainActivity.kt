@@ -3,7 +3,20 @@ package com.example.padm
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.padm.screens.HomeScreen
+import com.example.padm.screens.JoinScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -11,11 +24,49 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            PADM()
+            PADMApp()
         }
     }
 }
 
 @Composable
-fun PADM() {
+fun PADMApp() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            if (currentRoute != "game") {
+                Text("Navigation bar (placeholder)")
+            }
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "join",
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+        ) {
+            composable("join") {
+                JoinScreen(onJoined = { gameId, playerId, playerNumber ->
+                    navController.navigate("lobby/$gameId/$playerId/${playerNumber ?: -1}")
+                })
+            }
+            composable(
+                route = "lobby/{gameId}/{playerId}/{playerNumber}",
+                arguments = listOf(
+                    navArgument("gameId") { type = NavType.StringType },
+                    navArgument("playerId") { type = NavType.StringType },
+                    navArgument("playerNumber") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val gameId = backStackEntry.arguments?.getString("gameId").orEmpty()
+                val playerId = backStackEntry.arguments?.getString("playerId").orEmpty()
+                val playerNumber = backStackEntry.arguments?.getInt("playerNumber") ?: -1
+                HomeScreen(gameId, playerId, playerNumber)
+            }
+        }
+    }
 }

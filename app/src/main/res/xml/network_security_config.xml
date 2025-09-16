@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Autorise le cleartext UNIQUEMENT vers ton serveur -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Si tu utilises une IP LAN -->
+        <domain includeSubdomains="false">192.168.1.42</domain>
+    </domain-config>
+
+    <!-- Pour l’émulateur officiel -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+
+    <!-- Pour Genymotion -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.3.2</domain>
+    </domain-config>
+</network-security-config>
